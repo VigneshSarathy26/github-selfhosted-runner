@@ -6,6 +6,9 @@ on:
       - dev
       - test
       - stage
+    paths:
+      - 'images/runner-node/**'
+
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -1,0 +1,40 @@
+# images/runner-datascience-python/requirements.txt
+# For ML/Data Science workloads
+
+# Core Data Science
+numpy==1.26.3
+pandas==2.1.4
+scipy==1.11.4
+matplotlib==3.8.2
+seaborn==0.13.0
+plotly==5.18.0
+
+# Machine Learning
+scikit-learn==1.4.0
+xgboost==2.0.3
+lightgbm==4.1.0
+catboost==1.2.2
+
+# Deep Learning
+tensorflow==2.14.0
+torch==2.1.2
+torchvision==0.16.2
+transformers==4.36.2
+datasets==2.16.1
+
+# ML Ops
+mlflow==2.9.2
+dvc==3.48.0
+optuna==3.5.0
+hyperopt==0.2.7
+
+# Visualization
+ipython==8.18.1
+jupyter==1.0.0
+notebook==7.0.7
+jupyterlab==4.0.11
+
+# Model Serving
+fastapi==0.108.0
+uvicorn==0.25.0
+pydantic==2.5.3
