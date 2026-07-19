@@ -36,7 +36,8 @@ RUN python3 -m pip install --upgrade \
 
 # Copy requirements file
 COPY requirements.txt /tmp/requirements.txt
-RUN python3 -m pip install -r /tmp/requirements.txt || true
+RUN python3 -m pip install --upgrade pip \
+    && python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Set labels
 LABEL runner.type="python" \
