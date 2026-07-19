@@ -1,0 +1,37 @@
+# helm/arc-runner-sets/values-python.yaml
+githubConfigUrl: "https://github.com/your-org"
+githubConfigSecret: "github-runner-token"
+
+runnerScaleSetName: "python-runners"
+
+template:
+  spec:
+    containers:
+      - name: runner
+        image: "your-registry.azurecr.io/runner-python:latest"
+        imagePullPolicy: Always
+        env:
+          - name: RUNNER_LABELS
+            value: "self-hosted,Linux,X64,python,python3.11"
+          - name: RUNNER_ORG
+            value: "your-org"
+          - name: RUNNER_WORK_DIR
+            value: "/home/runner/_work"
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 1
+            memory: 2Gi
+
+replicas: 3
+
+minReplicas: 1
+maxReplicas: 5
+
+scaleDownDelaySecondsAfterScaleOut: 300
+scaleUpDelaySeconds: 30
+
+# For ephemeral runners
+ephemeral: true

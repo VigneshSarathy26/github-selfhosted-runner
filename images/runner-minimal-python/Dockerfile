@@ -1,18 +1,15 @@
 # images/runner-python/Dockerfile
-ARG BASE_IMAGE=github-runner-base:latest
-FROM ${BASE_IMAGE}
-
+# Build with: docker build --pull --rm -f "Dockerfile" -t "githubselfhostedrunner:latest" "."
+FROM mailtovignesh/github-selfhosted-runner:latest
 ARG PYTHON_VERSION
 ENV PYTHON_VERSION=${PYTHON_VERSION}
 
 # Copy version file
 COPY .python-version .python-version
 
-# Set Python version from file
-RUN export PYTHON_VERSION=$(cat .python-version)
-
-# Install Python and tools
-RUN sudo apt-get update && sudo apt-get install -y \
+# Install Python and tools using version from file
+RUN export PYTHON_VERSION=$(cat .python-version) \
+    && sudo apt-get update && sudo apt-get install -y \
     python${PYTHON_VERSION} \
     python${PYTHON_VERSION}-dev \
     python${PYTHON_VERSION}-venv \
@@ -20,9 +17,14 @@ RUN sudo apt-get update && sudo apt-get install -y \
     && sudo rm -rf /var/lib/apt/lists/*
 
 # Update alternatives to make python3 default
-RUN sudo update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1
+RUN export PYTHON_VERSION=$(cat .python-version) \
+    && sudo update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1
 
 # Install Python package managers
+# ✅ Fix for PEP 668
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Now pip works normally
 RUN python3 -m pip install --upgrade \
     pip \
     setuptools \
@@ -33,7 +35,6 @@ RUN python3 -m pip install --upgrade \
     flake8 \
     pytest \
     mypy
-
 # Copy requirements file
 COPY requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --upgrade pip \

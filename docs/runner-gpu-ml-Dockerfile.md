@@ -37,7 +37,9 @@ WORKDIR /actions-runner/
 COPY entrypoint.sh /actions-runner/entrypoint.sh
 RUN chmod +x /actions-runner/entrypoint.sh
 
-RUN useradd -m -d /home/agent agent && chown -R agent:agent /actions-runner
+RUN useradd -m -d /home/agent agent \
+    && echo "agent ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && chown -R agent:agent /actions-runner
 USER agent
 
 ENTRYPOINT [ "./entrypoint.sh" ]
