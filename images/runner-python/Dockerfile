@@ -1,0 +1,1 @@
+FROM githubselfhostedrunner:latest
