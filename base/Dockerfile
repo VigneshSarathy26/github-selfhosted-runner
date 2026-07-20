@@ -5,7 +5,7 @@ FROM ubuntu:24.04
 ENV TARGETARCH="linux-x64" \
     TZ=UTC \
     RUNNER_VERSION=2.335.1 
-    
+
 # Also can be "linux-arm", "linux-arm64".
 
 # Install dependencies
@@ -38,4 +38,4 @@ RUN chown -R agent:agent /actions-runner
 USER agent
 
 
-ENTRYPOINT [ "./entrypoint.sh" ]
+ENTRYPOINT [ "script/entrypoint.sh" ]

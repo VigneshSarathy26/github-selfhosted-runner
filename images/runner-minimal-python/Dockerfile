@@ -45,4 +45,4 @@ LABEL runner.type="python" \
     runner.python-version="${PYTHON_VERSION}" \
     runner.version="1.0.0"
 
-ENV RUNNER_LABELS="self-hosted,Linux,X64,python,minimal,python-$PYTHON_VERSION"
+ENV RUNNER_LABELS="self-hosted,Linux,X64,python,minimal,python-${PYTHON_VERSION}"
