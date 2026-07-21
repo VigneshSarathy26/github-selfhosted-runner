@@ -5,7 +5,7 @@ FROM ubuntu:24.04
 ENV TARGETARCH="linux-x64" \
     TZ=UTC \
     RUNNER_VERSION=2.335.1 
-    
+
 # Also can be "linux-arm", "linux-arm64".
 
 # Install dependencies
@@ -29,12 +29,14 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 WORKDIR /actions-runner/
 COPY entrypoint.sh /actions-runner/entrypoint.sh
+
 RUN chmod +x /actions-runner/entrypoint.sh
-# Create agent user and set up home directory
-RUN useradd -m -d /home/agent agent
+# Create agent user, set up home directory, and configure passwordless sudo
+RUN useradd -m -d /home/agent agent \
+    && echo "agent ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN chown -R agent:agent /actions-runner
 
 USER agent
 
 
-ENTRYPOINT [ "./entrypoint.sh" ]
+ENTRYPOINT [ "script/entrypoint.sh" ]
