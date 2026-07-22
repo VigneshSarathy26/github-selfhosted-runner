@@ -290,25 +290,30 @@ Add a new `job-containers/*` image when:
 - **Keeps `runner-generic` and `runner-base` slim** — bloat lives in small, disposable, per-job images instead of accumulating on your core runner image.
 - **Easy to retire** — if a toolchain stops being used, delete the Dockerfile and stop pushing it. No scale set to tear down, no idle pods to clean up.
 
-## Other job-container examples beyond `build-python312` and `build-node20`
+## Complete Job-Container Inventory & Use Cases
 
-| Image | Use case |
-|---|---|
-| `build-python311` | Repos still on 3.11 (separate from 3.12, so version pinning is explicit) |
-| `build-node18` | Legacy Node apps not yet migrated to 20 |
-| `build-java17` / `build-java21` | Maven/Gradle builds, JDK version pinned per repo |
-| `build-golang122` | Go builds, `go build`/`go test`, golangci-lint |
-| `build-dotnet8` | .NET SDK builds/tests |
-| `build-terraform` | `terraform plan/apply`, tflint, cloud CLI (az/aws/gcloud) — no Docker needed unless it also builds images |
-| `build-ansible` | Ansible playbook runs, config management jobs |
-| `build-rust` | `cargo build/test`, clippy |
-| `build-android-sdk` | Android build tooling (gradle + SDK, no emulator) |
-| `lint-only` | Just linters/formatters (eslint, black, shellcheck) — very small image for fast PR checks |
-| `build-php81` | PHP + composer for PHP repos |
-| `build-ruby32` | Ruby + bundler |
-| `security-scan` | Trivy, Snyk CLI, SAST tools — used as a step container across many repos regardless of their main language |
-| `build-cpp-gcc12` | C/C++ builds with a pinned GCC/CMake version |
-| `build-docs` | Sphinx/MkDocs/Docusaurus for docs-only repos — tiny image, fast builds |
+Below is the full catalog of job containers maintained in `job-containers/`. Each image is lightweight, built without the GitHub runner agent, and designed to be pulled dynamically via the `container:` key.
+
+| Image | Detailed Use Case | Key Included Tools |
+|---|---|---|
+| `build-node20` | Primary Node.js 20.x web apps, APIs, microservices, and frontends | Node.js 20, npm, yarn, pnpm, git |
+| `build-node18` | Legacy Node.js 18.x applications pending migration to Node 20 | Node.js 18, npm, git |
+| `build-python312` | Modern Python 3.12 microservices, FastAPI/Flask services, and data pipelines | Python 3.12, Poetry, pytest, build-essential |
+| `build-python311` | Repositories pinned to Python 3.11 for explicit version compatibility | Python 3.11, Poetry, pytest, pipenv |
+| `build-java17` | Enterprise Java 17 LTS applications (Spring Boot 3, Quarkus) | JDK 17 (Eclipse Temurin), Maven, Gradle |
+| `build-java21` | Modern Java 21 LTS applications utilizing virtual threads & modern JVM features | JDK 21 (Eclipse Temurin), Maven, Gradle |
+| `build-golang122` | Go 1.22 microservices, CLI tools, `go build`/`go test` execution | Go 1.22, golangci-lint, git |
+| `build-dotnet8` | .NET 8 SDK web APIs, console apps, and library package builds | .NET 8 SDK, dotnet CLI, git |
+| `build-terraform` | IaC validation and execution (`terraform plan/apply`, cloud infrastructure deployments) | Terraform 1.8+, tflint, Azure CLI / AWS CLI |
+| `build-ansible` | Infrastructure configuration management and automated playbook runs | Ansible, ansible-lint, OpenSSH, sshpass |
+| `build-rust` | High-performance Rust service & library builds, `cargo test`, linting | Rust 1.75+, Cargo, Clippy, rustfmt |
+| `build-android-sdk` | Android mobile application build pipelines (headless Gradle + SDK) | JDK 17, Android SDK Command-line tools, Gradle |
+| `lint-only` | Ultra-fast PR gate check container for multi-language linting and formatting | ESLint, Prettier, Black, ShellCheck |
+| `build-php81` | PHP 8.1 web applications, Laravel/Symfony frameworks, and Composer dependencies | PHP 8.1 CLI, Composer, Zip/Unzip |
+| `build-ruby32` | Ruby 3.2 web applications, Ruby on Rails, and Gem dependency builds | Ruby 3.2, Bundler, build-essential |
+| `security-scan` | Cross-repository vulnerability & SAST scanning across all language repos | Trivy, Snyk CLI, Grype, SAST scanners |
+| `build-cpp-gcc12` | C/C++ native application compilation with pinned compiler toolchain | GCC 12, G++, CMake, Ninja |
+| `build-docs` | Documentation build pipelines for technical documentation sites | Sphinx, MkDocs, Docusaurus, Python 3.11 |
 
 **Rule of thumb:** if it's "language/tool + version, no special privileges," it's a job-container. If it needs privileged access (DinD, host devices, kernel modules) or is used by *most* of your org's pipelines and rarely changes, that's when it graduates to a dedicated `images/runner-*` scale set instead.
 
@@ -405,3 +410,72 @@ jobs:
 ```
 
 These follow the same pattern as `build-python312`: no runner agent, no Docker CLI, no GitHub-specific bits — just the toolchain, kept as small as the job actually needs.
+
+## Common questions
+
+### How do I pass secrets into a job-container?
+
+You don't, directly. Secrets are automatically injected into the **runner pod** as environment variables. The job container runs as a peer process/container inside that same pod, so it inherits all environment variables from the pod, including secrets. You just use them in your steps normally:
+
+```yaml
+jobs:
+  deploy-dev:
+    runs-on: [self-hosted, generic]
+    container:
+      image: ghcr.io/yourorg/build-python312:latest   # <- any secrets already in the runner pod's env
+    steps:
+      - run: echo "My secret is $MY_SECRET"            # <- works because $MY_SECRET is in the runner pod's env
+```
+
+No change needed in the container image or the `container:` block — secrets just flow from the runner pod into the job container automatically.
+
+### What about the workspace? Do I need to mount it?
+
+No. When using `container:`, GitHub Actions automatically:
+
+- creates a **shared workspace** volume
+- checks out the repo into that volume
+- mounts it as `/github/workspace` inside your job container
+
+So you just `cd /github/workspace` and work there:
+
+```yaml
+jobs:
+  build:
+    runs-on: [self-hosted, generic]
+    container:
+      image: ghcr.io/yourorg/build-python312:latest
+    steps:
+      - uses: actions/checkout@v4                  # checks out to /github/workspace/repo
+      - run: cd /github/workspace/repo             # optional, already there
+      - run: python --version
+      - run: pytest
+```
+
+### Do I need to add the runner agent to job containers too?
+
+No — absolutely not. That's the whole point of this pattern: the runner agent stays in the **runner pod** (`runner-generic`), and the **job container** (`build-python312`) only gets the build tools it actually needs. This separation makes your runner pools generic and keeps your image sizes small.
+
+### Can I still use Docker-in-Docker in job containers?
+
+**No.** DinD requires **privileged mode**, and job containers run as **non-privileged** peer containers by default. The only way to get DinD is to run the Docker daemon *inside* the runner pod itself, which means you need:
+
+- a **dedicated runner scale set** (`runner-docker-dind`)
+- a `runs-on` label that points to that scale set (e.g. `[self-hosted, docker-dind]`)
+- a workflow that targets that label, *not* the `container:` block
+
+**Rule:** If the job needs to launch containers, it must be a **runner image** on a **runner scale set** — it cannot use the `container:` job-level pattern.
+
+This is why we have:
+
+- `runner-docker-dind` scale set (for jobs that need DinD)
+- `container:` pattern (for jobs that just need language runtimes)
+
+## Summary table: when to use which pattern
+
+| Pattern | What it is | When to use |
+|---|---|---|
+| **`runs-on` runner image** | An ARC `RunnerScaleSet` running in AKS with the full runner agent + toolchain in the image | When the runner pod **itself** needs specific tools (e.g. DinD, heavy CLIs) OR when you want the runner to be language/toolchain-specific. |
+| **`container:` job-level** | A **generic** `runner-generic` scale set that launches **different images per job** at execution time | When you want to keep your runner pools small and generic, and inject language toolchains **per job**. Best for multi-language orgs with many different version requirements. |
+
+`job-containers/` specifically implements the **`container:` job-level** pattern — no runner agent, no Docker CLI, no GitHub-specific bits — just the minimal toolchain each job needs.

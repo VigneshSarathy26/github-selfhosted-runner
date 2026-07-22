@@ -79,9 +79,24 @@ github-selfhosted-runner/
 │   ├── runner-python/          # Dedicated Python execution runner
 │   └── runner-terraform/       # Terraform execution runner
 ├── job-containers/             # Lightweight environments (no runner agent binary)
-│   ├── build-node20/           # Node.js 20 build environment
-│   ├── build-python312/        # Python 3.12 build environment
-│   └── build-terraform/        # Terraform environment
+│   ├── build-android-sdk/      # Android build tooling (Gradle + Android SDK)
+│   ├── build-ansible/          # Ansible playbook runs and config management
+│   ├── build-cpp-gcc12/        # C/C++ builds (GCC 12 + CMake + Ninja)
+│   ├── build-docs/             # Documentation site builds (Sphinx / MkDocs / Docusaurus)
+│   ├── build-dotnet8/          # .NET 8 SDK application builds and testing
+│   ├── build-golang122/        # Go 1.22 builds, tests, and golangci-lint
+│   ├── build-java17/           # Enterprise Java 17 LTS (Maven / Gradle)
+│   ├── build-java21/           # Modern Java 21 LTS (Virtual threads, Spring Boot 3)
+│   ├── build-node18/           # Legacy Node.js 18.x applications
+│   ├── build-node20/           # Primary Node.js 20.x build environment
+│   ├── build-php81/            # PHP 8.1 + Composer applications
+│   ├── build-python311/        # Legacy Python 3.11 microservices
+│   ├── build-python312/        # Primary Python 3.12 build environment
+│   ├── build-ruby32/           # Ruby 3.2 + Bundler applications
+│   ├── build-rust/             # Rust builds (`cargo test`, clippy)
+│   ├── build-terraform/        # Terraform IaC validation & cloud CLI steps
+│   ├── lint-only/              # Fast multi-language PR linting (ESLint, Black, ShellCheck)
+│   └── security-scan/          # Cross-repo vulnerability SAST scanning (Trivy, Snyk)
 ├── helm/
 │   └── custom-runner/          # Custom Helm Chart for deploying runner pools
 │       ├── templates/          # K8s manifest templates (Deployments, HPA, Ingress, Services)

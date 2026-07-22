@@ -28,9 +28,9 @@ RUN apt-get update && apt-get install -y \
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 WORKDIR /actions-runner/
-COPY entrypoint.sh /actions-runner/entrypoint.sh
+COPY start.sh  /actions-runner/start.sh
 
-RUN chmod +x /actions-runner/entrypoint.sh
+RUN chmod +x /actions-runner/start.sh
 # Create agent user, set up home directory, and configure passwordless sudo
 RUN useradd -m -d /home/agent agent \
     && echo "agent ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
@@ -39,4 +39,4 @@ RUN chown -R agent:agent /actions-runner
 USER agent
 
 
-ENTRYPOINT [ "script/entrypoint.sh" ]
+ENTRYPOINT [ "start.sh" ]
