@@ -190,6 +190,51 @@ jobs:
 
 ---
 
+## 🔮 Future Roadmap & Planned Enhancements
+
+### 🎯 Key Focus Areas
+*   **Enhancing Job Container Images:** Adding specialized, lightweight toolchains for emerging runtimes and language versions.
+*   **Enhancing Base Images:** Upgrading foundational OS distributions with security hardening and performance tuning.
+*   **Enhancing Runner Images:** Optimizing agent responsiveness, startup latency, and caching layers.
+*   **Setting Up Monitoring:** Establishing metrics collection, performance monitoring, and cluster health alerts.
+*   **Setting Up Logging:** Implementing centralized event streaming and structured log aggregation across runner pods.
+
+---
+
+### 📊 Tactical Pillar Breakdown
+
+#### 🔭 Observability Engineering
+| Telemetry Pillar | Core Capability / Objective | Target Technology Stack |
+| :--- | :--- | :--- |
+| **Metrics Collection** | Time-series metrics infrastructure & pod telemetry | Prometheus |
+| **Log Aggregation** | Event streaming & log aggregation | Grafana Loki |
+| **Distributed Tracing** | End-to-end job execution context tracing | OpenTelemetry |
+| **Visualization Layers** | Dynamic dashboards & real-time alerting | Grafana |
+
+#### 🛡️ DevSecOps & Zero Trust Architecture
+| Telemetry Pillar | Core Capability / Objective | Target Technology Stack |
+| :--- | :--- | :--- |
+| **Metrics Collection** | Security telemetry & policy enforcement metrics | Prometheus |
+| **Log Aggregation** | Audit log aggregation & event log forwarding | Grafana Loki |
+| **Distributed Tracing** | End-to-end security context tracing | OpenTelemetry |
+| **Visualization Layers** | Dynamic security dashboards & posture visibility | Grafana |
+
+#### 🚀 Automated CI/CD Pipelines & GitOps Delivery
+| Delivery Methodology | Structure / Approach | Key Ecosystem Tools |
+| :--- | :--- | :--- |
+| **Continuous Integration** | Automated container image build & verification pipelines | GitHub Actions |
+| **Declarative GitOps** | Reconciled state management for runner deployments | Argo CD |
+| **Progressive Rollouts** | Canary & progressive deployment strategy | Argo Rollouts |
+
+#### ☸️ Containers & Kubernetes Mastery
+| Feature Domain | Core Capability / Objective | Target Technology Stack |
+| :--- | :--- | :--- |
+| **Advanced Networking** | Dynamic pod IP management & eBPF policy enforcement | Cilium |
+| **Service Mesh Interconnect** | Automated mTLS & traffic management | Istio, Linkerd |
+| **Persistent Storage** | High-performance CSI storage integration | Cloud-native CSI |
+
+---
+
 ## 📖 Deep Dives & Documentation
 
 For detailed information on configuring and managing this platform, consult the comprehensive guides in the `/docs` directory:
