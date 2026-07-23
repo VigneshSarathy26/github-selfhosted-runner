@@ -1,7 +1,14 @@
 # images/runner-python/Dockerfile
-ARG BASE_IMAGE=github-runner-base:latest
-FROM ${BASE_IMAGE}
+FROM github-runner-ubuntu:1.0.0
 
+
+# Set environment variables
+ENV TARGETARCH="linux-x64" \
+    TZ=UTC \
+    DEBIAN_FRONTEND=noninteractive \
+    RUNNER_LABELS=python-web,python,python${PYTHON_VERSION//./}
+
+# 
 ARG PYTHON_VERSION
 ENV PYTHON_VERSION=${PYTHON_VERSION}
 
@@ -39,9 +46,4 @@ COPY requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Set labels
-LABEL runner.type="python" \
-    runner.python-version="${PYTHON_VERSION}" \
-    runner.version="1.0.0"
 
-ENV RUNNER_LABELS="self-hosted,Linux,X64,python-web,python,python${PYTHON_VERSION//./}"

@@ -1,9 +1,13 @@
-FROM baselximage:v1.0.0
+FROM mailtovignesh/github-selfhosted-runner:v1.0.0
 
 # Set labels
-LABEL runner.type="docker-dind" \
-    runner.version="1.0.0" \
-    maintainer="mr.devops@gmail.com" 
+ENV TARGETARCH="linux-x64" \
+    TZ=UTC \
+    DEBIAN_FRONTEND=noninteractive \
+    RUNNER_LABELS=docker-dind,ubuntu
+# Add a new runner user
+RUN useradd -m -d /home/runner runner \
+    && echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Install Docker Engine (not just the CLI — DinD needs the daemon too)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,7 +21,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends \
     docker-ce docker-ce-cli containerd.io docker-buildx-plugin \
     && rm -rf /var/lib/apt/lists/*
-
-RUN usermod -aG docker runner
 
 USER runner
