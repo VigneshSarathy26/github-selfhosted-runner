@@ -1,5 +1,4 @@
 FROM github-runner-ubuntu:1.0.0
-
 # environment variables
 ENV TARGETARCH="linux-x64" \
     TZ=UTC \

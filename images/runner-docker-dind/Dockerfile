@@ -1,10 +1,10 @@
-FROM mailtovignesh/github-selfhosted-runner:v1.0.0
+FROM github-runner-ubuntu:1.0.0
 
 # Set labels
 ENV TARGETARCH="linux-x64" \
     TZ=UTC \
     DEBIAN_FRONTEND=noninteractive \
-    RUNNER_LABELS=docker-dind,ubuntu
+    RUNNER_LABELS=docker-dind,ubuntu24
 # Add a new runner user
 RUN useradd -m -d /home/runner runner \
     && echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
