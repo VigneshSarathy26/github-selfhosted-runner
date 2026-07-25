@@ -4,9 +4,8 @@ FROM ubuntu:24.04
 # Note: Added DEBIAN_FRONTEND=noninteractive to prevent apt from hanging on user prompts
 ENV TARGETARCH="linux-x64" \
     TZ=UTC \
-    RUNNER_VERSION=2.335.1 \
-    DEBIAN_FRONTEND=noninteractive \
-    RUNNER_LABELS=base,ubuntu
+    RUNNER_VERSION=2.336.0 \
+    DEBIAN_FRONTEND=noninteractive 
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
