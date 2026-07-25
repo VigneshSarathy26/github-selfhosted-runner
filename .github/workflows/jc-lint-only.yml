@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/lint-only
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:lint-only
       - name: Scanning Docker Image for Vulnerabilities

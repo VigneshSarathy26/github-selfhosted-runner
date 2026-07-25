@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-dotnet8
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-dotnet8
       - name: Scanning Docker Image for Vulnerabilities

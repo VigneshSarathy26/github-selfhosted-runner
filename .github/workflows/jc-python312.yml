@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-python312
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-python312
       - name: Scanning Docker Image for Vulnerabilities

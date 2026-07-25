@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-ansible
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-ansible
       - name: Scanning Docker Image for Vulnerabilities

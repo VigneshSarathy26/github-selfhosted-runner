@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-ruby32
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-ruby32
       - name: Scanning Docker Image for Vulnerabilities

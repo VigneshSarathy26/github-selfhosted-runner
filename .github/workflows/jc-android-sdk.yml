@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-android-sdk
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-android-sdk
       - name: Scanning Docker Image for Vulnerabilities

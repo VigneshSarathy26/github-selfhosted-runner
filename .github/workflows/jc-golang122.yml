@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-golang122
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-golang122
       - name: Scanning Docker Image for Vulnerabilities

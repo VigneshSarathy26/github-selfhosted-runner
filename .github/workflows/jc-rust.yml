@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-rust
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-rust
       - name: Scanning Docker Image for Vulnerabilities

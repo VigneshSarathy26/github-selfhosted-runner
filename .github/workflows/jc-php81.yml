@@ -27,6 +27,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./jobcontainers/build-php81
+          load: true
           push: false
           tags: ${{ vars.REPOSITORY }}:build-php81
       - name: Scanning Docker Image for Vulnerabilities
