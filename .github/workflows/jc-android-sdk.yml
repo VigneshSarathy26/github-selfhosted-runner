@@ -25,6 +25,7 @@ jobs:
         with:
           context: ./jobcontainers/build-android-sdk
           push: true
+          load: true
           tags:
             ${{ vars.registry }}/mailtovignesh/build-android-sdk:${{ github.run_number }}
   scan:
@@ -42,7 +43,7 @@ jobs:
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image: ${{ vars.registry }}/mailtovignesh/build-android-sdk:${{ github.run_number }}
+          image-ref: ${{ vars.registry }}/mailtovignesh/build-android-sdk:${{ github.run_number }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
