@@ -17,7 +17,6 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ vars.REGISTRY }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
       - name: Build and push job container image
@@ -27,7 +26,7 @@ jobs:
           push: true
           load: true
           tags:
-            ${{ vars.registry }}/mailtovignesh/build-android-sdk:${{ github.run_number }}
+            ${{ vars.REPOSITORY }}:build-android-sdk
   scan:
     runs-on: ubuntu-latest
     needs: build
@@ -37,13 +36,12 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ vars.REGISTRY }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ${{ vars.registry }}/mailtovignesh/build-android-sdk:${{ github.run_number }}
+          image-ref: ${{ vars.REPOSITORY }}:build-android-sdk
           format: 'table'
           #exit-code: '1'
           ignore-unfixed: true
@@ -56,8 +54,7 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ vars.REGISTRY }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
       - name: Push Image
-        run: docker push ${{ vars.registry }}/mailtovignesh/build-android-sdk:${{ github.run_number }}
+        run: docker push ${{ vars.REPOSITORY }}:build-android-sdk
