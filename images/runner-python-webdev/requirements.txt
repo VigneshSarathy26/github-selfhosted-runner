@@ -1,0 +1,51 @@
+# For web application development
+
+# Web Frameworks
+Django==5.0.1
+Flask==3.0.0
+FastAPI==0.108.0
+Sanic==23.12.1
+Tornado==6.4.0
+
+# API Tools
+djangorestframework==3.14.0
+drf-yasg==1.21.7
+marshmallow==3.20.1
+webargs==8.3.0
+apispec==6.4.0
+
+# Database
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+pymongo==4.6.1
+redis==5.0.1
+asyncpg==0.29.0
+aiomysql==0.2.0
+alembic==1.13.1
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib==1.7.4
+bcrypt==4.1.2
+oauthlib==3.2.2
+PyJWT==2.8.0
+
+# Task Queues
+celery==5.3.4
+rq==1.15.1
+dramatiq==1.16.0
+
+# Testing
+pytest==7.4.4
+pytest-django==4.7.0
+pytest-flask==1.2.0
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+factory-boy==3.3.0
+faker==20.1.0
+
+# Utilities
+python-multipart==0.0.6
+python-dateutil==2.8.2
+Pillow==10.2.0
+email-validator==2.1.0

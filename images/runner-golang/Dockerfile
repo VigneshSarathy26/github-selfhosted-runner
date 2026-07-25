@@ -13,4 +13,9 @@ RUN GO_VERSION="$(cat go-version)" \
     && wget "https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz" \
     && sudo tar -C /usr/local -xzf "go${GO_VERSION}.linux-amd64.tar.gz" \
     && rm "go${GO_VERSION}.linux-amd64.tar.gz" \
-    && echo "export RUNNER_LABELS=ubuntu24,golang,go-$GO_VERSION" >> /home/agent/.bashrc
+    && sudo rm -rf /var/lib/apt/lists/* \
+    && echo "#!/bin/bash" > /actions-runner/wrapper.sh \
+    && echo "export RUNNER_LABELS=\"golang,go-${GO_VERSION},ubuntu24\"" >> /actions-runner/wrapper.sh \
+    && echo "exec /actions-runner/start.sh" >> /actions-runner/wrapper.sh \
+    && sudo chmod +x /actions-runner/wrapper.sh
+ENTRYPOINT ["/actions-runner/wrapper.sh"]
