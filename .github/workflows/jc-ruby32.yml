@@ -1,4 +1,4 @@
-name: Build job container for Android SDK
+name: Build job container for Ruby 3.2
 
 on: 
   push:
@@ -6,10 +6,10 @@ on:
       - dev
       - stage
     paths:
-      - "jobcontainers/build-android-sdk/**"
+      - "jobcontainers/build-ruby32/**"
       
 jobs:
-  build-jc-android-sdk:
+  build-jc-ruby32:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,17 +26,17 @@ jobs:
       - name: Build Docker Image 
         uses: docker/build-push-action@v7
         with:
-          context: ./jobcontainers/build-android-sdk
+          context: ./jobcontainers/build-ruby32
           push: false
-          tags: ${{ vars.REPOSITORY }}:build-android-sdk
+          tags: ${{ vars.REPOSITORY }}:build-ruby32
       - name: Scanning Docker Image for Vulnerabilities
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ${{ vars.REPOSITORY }}:build-android-sdk
+          image-ref: ${{ vars.REPOSITORY }}:build-ruby32
           format: 'table'
           #exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
       - name: Push Image to Artifactory
-        run: docker push ${{ vars.REPOSITORY }}:build-android-sdk
+        run: docker push ${{ vars.REPOSITORY }}:build-ruby32

@@ -1,4 +1,4 @@
-name: Build job container for Android SDK
+name: Build job container for Java 17
 
 on: 
   push:
@@ -6,10 +6,10 @@ on:
       - dev
       - stage
     paths:
-      - "jobcontainers/build-android-sdk/**"
+      - "jobcontainers/build-java17/**"
       
 jobs:
-  build-jc-android-sdk:
+  build-jc-java17:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,17 +26,17 @@ jobs:
       - name: Build Docker Image 
         uses: docker/build-push-action@v7
         with:
-          context: ./jobcontainers/build-android-sdk
+          context: ./jobcontainers/build-java17
           push: false
-          tags: ${{ vars.REPOSITORY }}:build-android-sdk
+          tags: ${{ vars.REPOSITORY }}:build-java17
       - name: Scanning Docker Image for Vulnerabilities
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ${{ vars.REPOSITORY }}:build-android-sdk
+          image-ref: ${{ vars.REPOSITORY }}:build-java17
           format: 'table'
           #exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
       - name: Push Image to Artifactory
-        run: docker push ${{ vars.REPOSITORY }}:build-android-sdk
+        run: docker push ${{ vars.REPOSITORY }}:build-java17
