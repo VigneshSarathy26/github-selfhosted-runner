@@ -5,8 +5,8 @@ on:
     branches:
       - dev
       - stage
-    paths:
-      - "jobcontainers/build-android-sdk/**"
+    # paths:
+    #   - "jobcontainers/build-android-sdk/**"
 
 jobs:
   build:
