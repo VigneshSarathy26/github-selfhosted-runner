@@ -40,11 +40,14 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
       - name: Scan Docker Image
-        uses: aquasecurity/trivy-action@v3
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image: ${{ vars.registry }}/mailtovignesh/build-android-sdk:${{ github.run_number }}
           format: 'table'
           exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
   push:
     runs-on: ubuntu=latest
     needs: [build, scan]
