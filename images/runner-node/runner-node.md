@@ -4,31 +4,34 @@ This documentation details the runner-node image Dockerfile, which extends the b
 
 ## General Information
 - **Repository Path**: [images/runner-node/Dockerfile](file:///D:/repositories/github-selfhosted-runner/images/runner-node/Dockerfile)
-- **Status**: Proposed / Placeholder
+- **Status**: Active
 - **Purpose**: A runner environment tailored for building, testing, and deploying Node.js applications.
 
 ## Key Features & Toolchain
-- **Inherited Base**: `base-runner` (built from [base/Dockerfile](file:///D:/repositories/github-selfhosted-runner/base/Dockerfile))
-- **Additional Utilities**:
-  - `Node.js` (latest LTS recommended)
-  - `npm` (Node Package Manager)
-  - `yarn` (Yarn package manager)
-  - `pnpm` (Performant npm package manager)
+- **Inherited Base**: `github-runner-ubuntu:1.0.0`
+- **Installed Utilities**:
+  - `Node.js` & `npm` (Installed via official NodeSource repository)
+- **Version Management & Wrapper Script**:
+  - Reads target Node.js release line dynamically from `node-version` (e.g., `24.x`).
+  - Downloads and runs the NodeSource setup script (`https://deb.nodesource.com/setup_${NODE_VERSION}`) to configure apt repositories and install `nodejs`.
+  - Dynamically builds `/actions-runner/wrapper.sh` to export dynamic runner labels (`node${NODE_VERSION},ubuntu24`) and delegate execution to `/actions-runner/start.sh`.
+  - Sets container `ENTRYPOINT` to `/actions-runner/wrapper.sh`.
 
-## Proposed Dockerfile Source Code
-*(The repository file is currently empty/under development. Below is the proposed layout to implement these requirements)*
+## Dockerfile Source Code
 
 ```dockerfile
-# Proposed Dockerfile for runner-node
-FROM selfhosted-runner-base:latest
+FROM github-runner-ubuntu:1.0.0
+COPY node-version node-version
+WORKDIR /actions-runner
+RUN NODE_VERSION=$(cat node-version) && \
+    curl -sL https://deb.nodesource.com/setup_${NODE_VERSION} -o /tmp/nodesource_setup.sh && \
+    sudo bash /tmp/nodesource_setup.sh && \
+    sudo apt-get install -y nodejs && \
+    echo "#!/bin/bash" > /actions-runner/wrapper.sh && \
+    echo "export RUNNER_LABELS=\"node${NODE_VERSION},ubuntu24\"" >> /actions-runner/wrapper.sh && \
+    echo "exec /actions-runner/start.sh" >> /actions-runner/wrapper.sh && \
+    sudo chmod +x /actions-runner/wrapper.sh
 
-USER root
-
-# Install Node.js LTS and package managers
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g yarn pnpm && \
-    rm -rf /var/lib/apt/lists/*
-
-USER agent
+# Override the entrypoint to use our new wrapper
+ENTRYPOINT ["/actions-runner/wrapper.sh"]
 ```

@@ -1,32 +1,55 @@
 # Generic Runner Dockerfile
 
-This documentation details the runner-generic image Dockerfile, which extends the base runner image with additional basic shell and utility tools.
+This documentation details the runner-generic image Dockerfile, which extends the base runner image with system administration utilities and cloud provider CLI tools.
 
 ## General Information
 - **Repository Path**: [images/runner-generic/Dockerfile](file:///D:/repositories/github-selfhosted-runner/images/runner-generic/Dockerfile)
-- **Status**: Proposed / Placeholder
-- **Purpose**: A general-purpose runner equipped with basic parsing tools and utilities needed by standard scripting jobs.
+- **Status**: Active
+- **Purpose**: A general-purpose runner equipped with system utilities and cloud CLIs (AWS, Azure, Google Cloud) for multi-cloud deployment and maintenance workflows.
 
 ## Key Features & Toolchain
-- **Inherited Base**: `base-runner` (built from [base/Dockerfile](file:///D:/repositories/github-selfhosted-runner/base/Dockerfile))
-- **Additional Utilities**:
-  - Basic shell utilities
-  - `jq` (JSON processor)
-  - `yq` (YAML processor)
-  - `unzip` (ZIP archive extraction)
+- **Inherited Base**: `github-runner-ubuntu:1.0.0`
+- **Environment Variables**:
+  - `TARGETARCH="linux-x64"`
+  - `TZ=UTC`
+  - `RUNNER_LABELS=ubuntu24,generic`
+- **Installed Utilities**:
+  - `htop` (Interactive process viewer)
+  - `tree` (Directory structure viewer)
+  - `ncdu` (NCurses disk usage analyzer)
+  - `ripgrep` (Fast text search tool)
+  - `fd-find` (Simple, fast alternative to find)
+- **Cloud Provider CLIs**:
+  - `Azure CLI`
+  - `AWS CLI v2`
+  - `Google Cloud SDK / CLI`
 
-## Proposed Dockerfile Source Code
-*(The repository file is currently empty/under development. Below is the proposed layout to implement these requirements)*
+## Dockerfile Source Code
 
 ```dockerfile
-# Proposed Dockerfile for runner-generic
-FROM selfhosted-runner-base:latest
+# images/runner-generic/Dockerfile
+FROM github-runner-ubuntu:1.0.0
 
-USER root
+# 
+ENV TARGETARCH="linux-x64" \
+    TZ=UTC \
+    RUNNER_LABELS=ubuntu24,generic
 
-# Install generic utilities: yq, unzip, etc. (jq/unzip are in base, yq can be added)
-RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
-    chmod +x /usr/bin/yq
+# Additional tools for generic runner
+RUN sudo apt-get update && sudo apt-get install -y \
+    htop \
+    tree \
+    ncdu \
+    ripgrep \
+    fd-find \
+    && sudo rm -rf /var/lib/apt/lists/*
 
-USER agent
+# Install Azure CLI
+RUN curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash
+# Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+RUN unzip awscliv2.zip
+RUN sudo ./aws/install
+# Install Google Cloud CLI
+RUN curl https://sdk.cloud.google.com | bash
 ```

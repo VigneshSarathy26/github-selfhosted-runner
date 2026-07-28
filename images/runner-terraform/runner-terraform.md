@@ -1,50 +1,44 @@
 # Terraform / Infrastructure Runner Dockerfile
 
-This documentation details the runner-terraform image Dockerfile, which extends the base runner image with infrastructure-as-code (IaC) tooling and major cloud command-line interfaces.
+This documentation details the runner-terraform image Dockerfile, which extends the base runner image with HashiCorp Terraform and major cloud provider command-line interfaces.
 
 ## General Information
 - **Repository Path**: [images/runner-terraform/Dockerfile](file:///D:/repositories/github-selfhosted-runner/images/runner-terraform/Dockerfile)
-- **Status**: Proposed / Placeholder
-- **Purpose**: A specialized runner environment configured for linting, planning, testing, and applying cloud infrastructure modifications.
+- **Status**: Active
+- **Purpose**: A specialized runner environment configured for linting, planning, testing, and applying cloud infrastructure modifications using Terraform across AWS, Azure, and Google Cloud Platform.
 
 ## Key Features & Toolchain
-- **Inherited Base**: `base-runner` (built from [base/Dockerfile](file:///D:/repositories/github-selfhosted-runner/base/Dockerfile))
-- **Additional Utilities**:
-  - `Terraform` (infrastructure provisioning tool)
-  - `tflint` (linter for Terraform configuration)
-  - `AWS CLI` (Amazon Web Services CLI tool)
-  - `gcloud CLI` (Google Cloud Platform SDK/CLI tool)
-  - `Azure CLI` (Note: Azure CLI is already installed in the base image, but it can be referenced/updated here)
+- **Inherited Base**: `github-runner-ubuntu:1.0.0`
+- **Environment Variables**:
+  - `TARGETARCH="linux-x64"`
+  - `TZ=UTC`
+  - `RUNNER_LABELS=terraform,ubuntu`
+- **Installed Utilities & Cloud CLIs**:
+  - `Terraform` (HashiCorp infrastructure provisioning tool, installed via official HashiCorp apt repository)
+  - `Azure CLI` (Installed via official Microsoft install script)
+  - `AWS CLI v2` (Installed via official AWS Linux ZIP bundle)
+  - `Google Cloud CLI` (Installed via Google Cloud SDK setup script)
 
-## Proposed Dockerfile Source Code
-*(The repository file is currently empty/under development. Below is the proposed layout to implement these requirements)*
+## Dockerfile Source Code
 
 ```dockerfile
-# Proposed Dockerfile for runner-terraform
-FROM selfhosted-runner-base:latest
+FROM github-runner-ubuntu:1.0.0
+# environment variables
+ENV TARGETARCH="linux-x64" \
+    TZ=UTC \
+    RUNNER_LABELS=terraform,ubuntu
 
-USER root
+# Install Terraform
+RUN wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list \
+    && sudo apt update && sudo apt install terraform -y
 
-# Install Terraform & HashiCorp GPG key
-RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com noble main" | tee /etc/apt/sources.list.d/hashicorp.list && \
-    apt-get update && apt-get install -y terraform && \
-    rm -rf /var/lib/apt/lists/*
-
+# Install Azure CLI
+RUN curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash
 # Install AWS CLI
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
-    unzip awscliv2.zip && \
-    ./aws/install && \
-    rm -rf awscliv2.zip aws
-
-# Install gcloud CLI
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    curl https://packages.cloud.google.com/contained-releases/key | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-    apt-get update && apt-get install -y google-cloud-cli && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install tflint
-RUN curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-
-USER agent
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+RUN unzip awscliv2.zip
+RUN sudo ./aws/install
+# Install Google Cloud CLI
+RUN curl https://sdk.cloud.google.com | bash
 ```
