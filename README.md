@@ -47,8 +47,8 @@ This platform segregates concerns into a control plane running on system node po
 *   **Graceful Termination Handling:** Captures Spot interruption notifications and drains runners gracefully (2-minute warning) to prevent interrupted workflows.
 
 ### 3. Isolated Job-Containers Pattern
-*   **Anti-Bloat Design:** Separates the runner executor from the toolchains. Instead of maintaining giant, specialized runner images, you run a minimal, generic runner pod (`runner-generic`) that dynamically fetches lightweight toolchain containers (`job-containers/`) using the workflow's `container:` key.
-*   **Toolchains-on-Demand:** Keeps the AKS footprint minimal while developer teams get customized runtime configurations (Python, Node.js, Go, Terraform) without multiplying dedicated infrastructure.
+*   **Anti-Bloat Design:** Separates the runner executor from the toolchains. Instead of maintaining giant, specialized runner images, you run a minimal, generic runner pod (`runner-generic`) that dynamically fetches lightweight toolchain containers (`jobcontainers/`) using the workflow's `container:` key.
+*   **Toolchains-on-Demand:** Keeps the infrastructure footprint minimal while developer teams get customized runtime configurations (Python, Node.js, Go, Java, Terraform) without multiplying dedicated infrastructure.
 
 ### 4. Enterprise Governance & Security
 *   **Policy-as-Code:** Uses **OPA/Gatekeeper** and **Kyverno 2.0** to validate pod specifications, blocking privileged execution, restricting host mounts, and enforcing resource limits.
@@ -73,15 +73,42 @@ github-selfhosted-runner/
 │   ├── Dockerfile              # Core runner image setup (Ubuntu 24.04 + GitHub agent v2.335.1)
 │   └── entrypoint.sh           # Runner registration/deregistration lifecycle scripts
 ├── images/                     # Specialized execution runners (with installed agents)
-│   ├── runner-generic/         # Light runner acting as the orchestrator/scheduler
-│   ├── runner-docker-dind/     # Privileged Docker-in-Docker runners
+│   ├── runner-docker-dind/     # Privileged Docker-in-Docker runner
+│   ├── runner-dotnet/          # .NET SDK runner environment
+│   ├── runner-generic/         # Light runner acting as orchestrator/scheduler
+│   ├── runner-golang/          # Go/Golang runner environment
+│   ├── runner-java/            # Java runner with OpenJDK, Maven, and Gradle
+│   ├── runner-k8s/             # Kubernetes tooling runner (kubectl, helm, etc.)
+│   ├── runner-minimal-python/  # Lightweight minimal Python runner
 │   ├── runner-node/            # Node.js developer environment runner
-│   ├── runner-python/          # Dedicated Python execution runner
-│   └── runner-terraform/       # Terraform execution runner
-├── job-containers/             # Lightweight environments (no runner agent binary)
-│   ├── build-node20/           # Node.js 20 build environment
-│   ├── build-python312/        # Python 3.12 build environment
-│   └── build-terraform/        # Terraform environment
+│   ├── runner-python-datascience/ # Python Data Science & Analytics runner
+│   ├── runner-python-devops/   # Python DevOps & Automation runner
+│   ├── runner-python-prod-ready/  # Production-ready hardened Python runner
+│   ├── runner-python-qa-testing/  # Python QA & Automated Testing runner
+│   ├── runner-python-scientific-computing/ # Python Scientific Computing runner
+│   ├── runner-python-webdev/   # Python Web Development runner
+│   ├── runner-rust/            # Rust toolchain runner
+│   └── runner-terraform/       # Terraform IaC execution runner
+├── jobcontainers/              # Lightweight environments (no runner agent binary)
+│   ├── build-android-sdk/      # Android build tooling (Gradle + Android SDK)
+│   ├── build-ansible/          # Ansible playbook runs and config management
+│   ├── build-cpp-gcc12/        # C/C++ builds (GCC 12 + CMake + Ninja)
+│   ├── build-docs/             # Documentation site builds (Sphinx / MkDocs / Docusaurus)
+│   ├── build-dotnet8/          # .NET 8 SDK application builds and testing
+│   ├── build-golang122/        # Go 1.22 builds, tests, and golangci-lint
+│   ├── build-java17/           # Enterprise Java 17 LTS (Maven / Gradle)
+│   ├── build-java21/           # Modern Java 21 LTS (Virtual threads, Spring Boot 3)
+│   ├── build-node18/           # Legacy Node.js 18.x applications
+│   ├── build-node20/           # Primary Node.js 20.x build environment
+│   ├── build-php81/            # PHP 8.1 + Composer applications
+│   ├── build-python311/        # Legacy Python 3.11 microservices
+│   ├── build-python312/        # Primary Python 3.12 build environment
+│   ├── build-ruby32/           # Ruby 3.2 + Bundler applications
+│   ├── build-rust/             # Rust builds (`cargo test`, clippy)
+│   ├── build-terraform/        # Terraform IaC validation & cloud CLI steps
+│   ├── lint-only/              # Fast multi-language PR linting (ESLint, Black, ShellCheck)
+│   ├── security-scan/          # Cross-repo vulnerability SAST scanning (Trivy, Snyk)
+│   └── job-container.md        # Comprehensive job container architecture documentation
 ├── helm/
 │   └── custom-runner/          # Custom Helm Chart for deploying runner pools
 │       ├── templates/          # K8s manifest templates (Deployments, HPA, Ingress, Services)
@@ -150,12 +177,12 @@ For stable workflows that run frequently and require heavy, pre-cached binaries 
 ```yaml
 jobs:
   build:
-    runs-on: [self-hosted, python] # Routes directly to images/runner-python
+    runs-on: [self-hosted, java] # Routes directly to images/runner-java
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Run Test Suite
-        run: pytest tests/
+      - name: Build Project
+        run: mvn clean package
 ```
 
 ### Pattern B: Isolated Job Containers (Recommended)
@@ -175,13 +202,63 @@ jobs:
 
 ---
 
+## 🔮 Future Roadmap & Planned Enhancements
+
+### 🎯 Key Focus Areas
+*   **Enhancing Job Container Images:** Adding specialized, lightweight toolchains for emerging runtimes and language versions.
+*   **Enhancing Base Images:** Upgrading foundational OS distributions with security hardening and performance tuning.
+*   **Enhancing Runner Images:** Optimizing agent responsiveness, startup latency, and caching layers.
+*   **Setting Up Monitoring:** Establishing metrics collection, performance monitoring, and cluster health alerts.
+*   **Setting Up Logging:** Implementing centralized event streaming and structured log aggregation across runner pods.
+
+---
+
+### 📊 Tactical Pillar Breakdown
+
+#### 🔭 Observability Engineering
+| Telemetry Pillar | Core Capability / Objective | Target Technology Stack |
+| :--- | :--- | :--- |
+| **Metrics Collection** | Time-series metrics infrastructure & pod telemetry | Prometheus |
+| **Log Aggregation** | Event streaming & log aggregation | Grafana Loki |
+| **Distributed Tracing** | End-to-end job execution context tracing | OpenTelemetry |
+| **Visualization Layers** | Dynamic dashboards & real-time alerting | Grafana |
+
+#### 🛡️ DevSecOps & Zero Trust Architecture
+| Security Pillar | Core Capability / Objective | Target Technology Stack |
+| :--- | :--- | :--- |
+| **Policy Enforcement** | Admission control & container policy enforcement | OPA / Gatekeeper, Kyverno |
+| **Log Aggregation** | Audit log aggregation & security event log forwarding | Grafana Loki |
+| **Distributed Tracing** | End-to-end security context tracing | OpenTelemetry |
+| **Visualization Layers** | Dynamic security dashboards & posture visibility | Grafana |
+
+#### 🚀 Automated CI/CD Pipelines & GitOps Delivery
+| Delivery Methodology | Structure / Approach | Key Ecosystem Tools |
+| :--- | :--- | :--- |
+| **Continuous Integration** | Automated container image build & verification pipelines | GitHub Actions |
+| **Declarative GitOps** | Reconciled state management for runner deployments | Argo CD |
+| **Progressive Rollouts** | Canary & progressive deployment strategy | Argo Rollouts |
+
+#### ☸️ Containers & Kubernetes Mastery
+| Feature Domain | Core Capability / Objective | Target Technology Stack |
+| :--- | :--- | :--- |
+| **Advanced Networking** | Dynamic pod IP management & eBPF policy enforcement | Cilium |
+| **Service Mesh Interconnect** | Automated mTLS & traffic management | Istio, Linkerd |
+| **Persistent Storage** | High-performance CSI storage integration | Cloud-native CSI |
+
+---
+
 ## 📖 Deep Dives & Documentation
 
-For detailed information on configuring and managing this platform, consult the comprehensive guides in the `/docs` directory:
+For detailed information on configuring and managing this platform, consult the comprehensive guides in the `/docs` and `/jobcontainers` directories:
 
 *   [Executive Summary & ARC Comparison](file:///d:/repositories/github-selfhosted-runner/docs/executive-summary-and-comparison.md): Feature comparison matrix, cost ROI metrics, and architectural decision flowcharts.
+*   [ARC vs Custom Helm Chart Diff](file:///d:/repositories/github-selfhosted-runner/docs/diff-btw-arc-vustom-helm-chart.md): Architectural diff analysis between standard ARC and Custom Helm Chart.
 *   [Detailed Feature Explanations](file:///d:/repositories/github-selfhosted-runner/docs/detailed-feature-explanations.md): Mechanisms of auto-healing, predictive scaling, KEDA settings, and security controls.
 *   [Infrastructure Setup Guide](file:///d:/repositories/github-selfhosted-runner/docs/infrastructure-setup-guide.md): Complete setup walkthroughs for AWS/Azure/GCP clusters, including Karpenter provisioning models.
+*   [Azure Infrastructure Setup](file:///d:/repositories/github-selfhosted-runner/docs/azure-infra.md): Specific deployment guide for Azure AKS and enterprise landing zones.
 *   [Advanced Features Configuration](file:///d:/repositories/github-selfhosted-runner/docs/advanced-features-configuration.md): Deep-dive into Gatekeeper constraints, Kyverno rules, VPA policies, and Kube-downscaler configs.
-*   [Job Container Pattern Guide](file:///d:/repositories/github-selfhosted-runner/docs/job-container.md): Step-by-step setup details for the `job-containers/` split pattern vs. nested Docker-in-Docker.
+*   [Best Practices Guide](file:///d:/repositories/github-selfhosted-runner/docs/best-practices.md): Enterprise operational standards for pool management, security, and maintenance.
+*   [Helm Configuration & Roadmap References](file:///d:/repositories/github-selfhosted-runner/docs/helm-configuration-roadmap-references.md): Comprehensive Helm chart configuration breakdown and technical roadmap.
+*   [Troubleshooting Guide](file:///d:/repositories/github-selfhosted-runner/docs/troubleshooting.md): Diagnostic matrix for resolving scaling, networking, and agent registration issues.
 *   [Resource Naming Conventions](file:///d:/repositories/github-selfhosted-runner/docs/namingconvension.md): Consistent tag patterns for resource groups, virtual networks, and subnets.
+*   [Job Container Pattern Guide](file:///d:/repositories/github-selfhosted-runner/jobcontainers/job-container.md): Step-by-step setup details for the `jobcontainers/` split pattern vs. nested Docker-in-Docker.

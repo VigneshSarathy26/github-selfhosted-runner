@@ -1,14 +1,10 @@
 # images/runner-generic/Dockerfile
-ARG BASE_IMAGE=github-runner-base:latest
-FROM ${BASE_IMAGE}
+FROM github-runner-ubuntu:1.0.0
 
-# Set labels
-LABEL runner.type="generic" \
-    runner.version="1.0.0" \
-    maintainer="mr.devops@gmail.com" 
-
-# Set default labels for runner
-ENV RUNNER_LABELS="self-hosted,Linux,X64,generic"
+# 
+ENV TARGETARCH="linux-x64" \
+    TZ=UTC \
+    RUNNER_LABELS=ubuntu24,generic
 
 # Additional tools for generic runner
 RUN sudo apt-get update && sudo apt-get install -y \
@@ -27,3 +23,4 @@ RUN unzip awscliv2.zip
 RUN sudo ./aws/install
 # Install Google Cloud CLI
 RUN curl https://sdk.cloud.google.com | bash
+

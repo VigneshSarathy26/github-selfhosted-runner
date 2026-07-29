@@ -1,4 +1,3 @@
-# images/runner-minimal-python/requirements.txt
 # Core Python tools for basic runner functionality
 
 # Package Management
